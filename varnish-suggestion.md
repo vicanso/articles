@@ -397,7 +397,7 @@ GET /cache/max-age/60 返回数据设置Cache-Control:public, max-age=60
 
 ### varnish-generator
 
-遵循上面所说的可缓存与不可缓存的请求配置处理，我定义好了一套`varnish`的模板配置，每次新的项目启动之前，都要求实现上面所说的规则，在正式上线的时候，只需要增加`backend` 的配置就可以了，摆脱了每个项目都要各自配置自己的`varnish`，而且后期维护不方便的局面。对此我写了一个`node.js`的模块`[varnish-generator](https://github.com/vicanso/varnish-generator)`，根据`backend`配置来生成对应的`vcl`，以后只需要关注如下的服务器配置：
+遵循上面所说的可缓存与不可缓存的请求配置处理，我定义好了一套`varnish`的模板配置，每次新的项目启动之前，都要求实现上面所说的规则，在正式上线的时候，只需要增加`backend` 的配置就可以了，摆脱了每个项目都要各自配置自己的`varnish`，而且后期维护不方便的局面。对此我写了一个`node.js`的模块[varnish-generator](https://github.com/vicanso/varnish-generator)，根据`backend`配置来生成对应的`vcl`，以后只需要关注如下的服务器配置：
 
 ```json
 {
