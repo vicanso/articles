@@ -1,0 +1,10 @@
+{
+  "name": "express-session-test",
+  "dependencies": {
+    "connect-redis": "^3.2.0",
+    "express": "^4.14.1",
+    "express-session": "^1.15.1",
+    "node-uuid": "^1.4.7",
+    "on-headers": "^1.0.1"
+  }
+}
