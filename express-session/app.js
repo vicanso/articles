@@ -23,13 +23,6 @@ const sessionMiddleware = session({
 });
 
 const sessionReadonly = (req, res, next) => {
-  // 在此我偷懒只对res.json做重载，
-  // var _json = res.json;
-  // res.json = (...args) => {
-  //   delete req.sessionID;
-  //   delete req.session;
-  //   _json.call(res, ...args);
-  // };
   sessionMiddleware(req, res, next);
   onHeaders(res, () => {
     delete req.sessionID;
@@ -45,7 +38,7 @@ app.get('/user', sessionMiddleware, (req, res) => {
   res.json(req.session.user);
 });
 
-app.get('/user/readonly', sessionMiddleware, (req, res) => {
+app.get('/user/readonly', sessionReadonly, (req, res) => {
   const user = req.session.user;
   res.json(user);
 });
