@@ -9,7 +9,7 @@ InfluxDB is a time series database built from the ground up to handle high write
 上面的这一段`influxdb`的介绍，在我了解了它的`point`的组成之后，我对于它的数据实时统计、分析是没有什么怀疑的（point的组成后面有所介绍），但是它的性能，一开始我是有所怀疑，因为它使用的是http的方式来写入数据（也有UDP的方式，不过每个measuremnt都要自己配置），后来看到它的`Writing multiple points`，一次`post`中提交多个point的做法（我一般一次提交100个），性能上完全不是大问题。
 
 
-### InfluxDB 的统计记录点 
+### InfluxDB 的统计记录点
 
 下面来看一下`influxdb point`的组成：
 
@@ -46,7 +46,7 @@ time			host		value
 
 这个应该怎么避免了，将数据缓存再写入的时候，填充`timestamp`字段？是的，我最开始也是这样的想法，因此每条记录都会调用`Date.now()`来生成`timestamp`(我使用的是node.js，取ms的timestamp比较简单)。开始使用了一段时间，发现数据还是对不上号,有所缺失，跟踪日志，发现接口都是有调用成功的，后来才留意到，因为我的程序不止一个实例，在多个实例中，`ms`级别的`timestamp`还是会有冲突的可能性存在，最终调整至`ns`级别之后，没有发现再有统计缺失。因此在使用`write multi points`的时候，最好还是自己把`timestamp`带上，而且精度要足够，那种直接使用`s`级别的，就真的要认真考虑考虑了。
 
-*注：原则上ns因为不同的实例中还是有可能会存在覆盖，但是要tag_set + timestamp(ns) 都相同，这个概率我觉得可以忽略了。
+* 注：原则上ns因为不同的实例中还是有可能会存在覆盖，但是要tag_set + timestamp(ns) 都相同，这个概率我觉得可以忽略了。
 
 ### InfluxDB 中 tag_set 和 field_set 的选择
 
@@ -102,17 +102,113 @@ http,device=pc,method=GET,spdy=0,type=2 url=\"/users/me\",code=200i,contentLengt
 
 对于如果区分使用tag还是field，首要满足的是统计分析展示的需要，而tag是有索引的，查询速度快（因此每个tag的可选值范围也不要太大）,field则是使用做sum、mean等计算（一般都是一些特别的计算值，如购买产品金额等等）
 
+#### 用户操作日志流水
+
+在以前的系统中，如果要查看一下某个用户特定时间的操作，都是通过从日志中分析，而日志中输出的内容实在是有点点（较多不确定有用无用的数据都输出了），而对于直接跟踪用户的行为日志，无法直观的查看，因此后期我也将用户的操作以流水的形式记录到influxdb中。
+
+首先来对于用户的操作，主要关注的是添加、更新、删除等操作（对应HTTP POST PUT DELETE），而需要记录的参数也需要单独定义（一开始考虑过把所有的参数都记录，后来怕不小心记录一些敏感信息，因此还是通过定义的方式），对于每个需要做记录的路由增加中间件的处理，下面是使用koa的例子：
+
+```js
+/**
+ * 记录用户的行为日志到influxdb中
+ * @param  {Object} data 用户行为日志数据
+ */
+function logUserTracker(data) {
+  console.info(`user tracker ${stringify.json(data)}`);
+  const tags = 'category result'.split(' ');
+  influx.write('userTracker', _.omit(data, tags), _.pick(data, tags));
+}
+
+/**
+ * 生成行为日志中间件，根据设置的参数列表获取用户提交的参数，
+ * 以后最后的结果，记录到influxdb中
+ * @param  {String} category 该用户行为分类，如：用户注册、用户收藏
+ * @param  {Array} params   参数列表, 如：["name", "code"]，
+ * 取参数的优先顺序是：ctx.request.body --> ctx.params --> ctx.query
+ * @return {Function} 返回中间件处理函数
+ */
+const tracker = (category, params) => (ctx, next) => {
+  const data = {
+    category,
+    // 也可以通过从session中获取当前用户账号，记录账号
+    token: ctx.get('X-User-Token'),
+    ip: ctx.ip,
+  };
+  _.forEach(params, (param) => {
+    _.forEach(['request.body', 'params', 'query'], (key) => {
+      const v = _.get(ctx, `${key}.${param}`);
+      if (_.isNil(data[param]) && !_.isNil(v)) {
+        data[param] = v;
+      }
+    });
+  });
+  const start = Date.now();
+  const delayLog = (use, result) => {
+    data.result = result;
+    data.use = use;
+    logUserTracker(data);
+  };
+  return next().then(() => {
+    setImmediate(delayLog, Date.now() - start, 'success');
+  }, (err) => {
+    setImmediate(delayLog, Date.now() - start, 'fail');
+    throw err;
+  });
+};
+
+router.post('/like/:id', tracker("user-like", ["code"]), (ctx) => {
+  return User.like(ctx.params.id).then(() => {
+    return ctx.status = 201;
+  });
+});
+```
+
+使用tracker中间件之后，对于用户like的操作，会记录tags: category, result以及fields:token, ip, use, code(自定义的参数)，在对各POST, PUT, DELETE的路由都增加tracker中间件之后，用户的操作日志就可以简单的通过用户token直接把限定时间段的日志全部展示出来。
 
 ### InfluxDB Functions
 
-influxdb中提供一系列的`Aggregations`来方便展示的展示，如`count`计算总次数， `sum`计算总和， `mean`计算平均值等，还有`Selectors` `Transformations`等等，这里就不一一详解，大家可以去官网上看[文档](https://docs.influxdata.com/influxdb/v1.1/query_language/functions)。
+influxdb中提供一系列的`Aggregations`来方便展示的展示，如`count`计算总次数， `sum`计算总和， `mean`计算平均值等，还有`Selectors` `Transformations`等等，这里就不一一详解，大家可以去官网上看[文档](https://docs.influxdata.com/influxdb/v1.2/query_language/functions)。
 
 下面根据上面所说的两个例子，讲解如果生成相应的统计图：
 
 - 对于HTTP的响应，我首先需要关注的就是`http status`，是正常的`20x`, `30x`还是错误的`40x`与`50x`等，所以我将是5分钟的间隔，对HTTP的统计做group by `type`的分组，计算各`type`出现的数量，如果`4`与`5`出现的总数在期望值以下，那么就认为系统各功能总体正常
 
+```influx-ql
+select count("url") from "mydb".."http" where time >= now() - 2h group by time(5m),"type"
+```
+![](assets/best-statistics-01.png)
+
 - 对于HTTP的响应，`type`只能看出系统功能是否正常，但是性能如何就需要通过`spdy`来衡量了，也是以5分钟的间隔做group by `spdy`，计算各`spdy`出现的数量
+
+
+```influx-ql
+select count("url") from "mydb".."http" where time >= now() - 2h group by time(5m),"spdy"
+```
+![](assets/best-statistics-01.png)
 
 - 对于小说订阅的统计，主要关注订阅的量，以5分钟的间隔count订阅的总数，直接通过这个总数来反映系统是否正常
 
-- 对于小说订阅的统计，也还关注支付的量，也是以5分钟的间隔sum(amount)的值，从而反映出订单与支付业务是否正常
+```influx-ql
+select count("book") from "mydb".."subscription" where time >= now() - 2h group by time(5m)
+```
+![](assets/best-statistics-03.png)
+
+- 对于小说订阅的统计，主要关注支付的量，也是以5分钟的间隔sum(amount)的值，从而反映出订单与支付业务是否正常
+
+```influx-ql
+select sum("amount") from "mydb".."order" where time >= now() - 2h group by time(5m)
+```
+![](assets/best-statistics-04.png)
+
+- 用户行为日志流程
+
+```influx-ql
+select * from "mydb".."tracker" where time >= now() - 2h
+```
+![](assets/best-statistics-01.png)
+
+
+### 附：
+
+- 上面例子中node.js中写入数据至influxdb使用的是[influxdb-nodejs](https://github.com/vicanso/influxdb-nodejs)
+- 上面例子中展示截图中展示数据用到的是[aslant](https://github.com/vicanso/aslant)
