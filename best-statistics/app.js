@@ -36,6 +36,7 @@ function addUserActionStats() {
       name: '书名',
       author: '作者',
       amount: _.random(1, 100),
+      account: 'vicanso',
     })
     .queue();
 
@@ -49,6 +50,7 @@ function addUserActionStats() {
       .field({
         name: '书名',
         author: '作者',
+        account: 'vicanso',
       })
       .queue();
   setTimeout(addUserActionStats, _.random(3 * 1000, 60 * 1000));

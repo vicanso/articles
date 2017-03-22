@@ -207,6 +207,11 @@ select * from "mydb".."tracker" where time >= now() - 2h
 ```
 ![](assets/best-statistics-01.png)
 
+- 购买人次
+
+```influx-ql
+select count(distinct(account)) from "mydb".."order" where time >= now() - 2h
+```
 
 ### 附：
 
