@@ -1,4 +1,4 @@
-# 使用`influxdb`有感
+# 使用influxdb有感
 
 在做开发的这些年来，一直都在想怎么衡量对系统的优化是否有效，怎么能更便捷的监控系统是否稳定，怎么才能满足业务或者产品对于一些简单统计的需求。曾经试用过`statsd`，但是它的统计比较单一，不好满足一些多维度的统计需求，也试过自己去开发，最终也只能放弃，实在是太麻烦了（技术不够），最后接触了`influxdb`之后，慢慢的以前的统计工作都转移到`influxdb`上。
 
@@ -205,7 +205,7 @@ select sum("amount") from "mydb".."order" where time >= now() - 2h group by time
 ```influx-ql
 select * from "mydb".."tracker" where time >= now() - 2h
 ```
-![](assets/best-statistics-01.png)
+![](assets/best-statistics-05.png)
 
 - 购买人次
 
