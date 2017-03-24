@@ -469,4 +469,4 @@ GET /cache/max-age/60 返回数据设置Cache-Control:public, max-age=60
 ```
 ## 建议
 
-对于缓存的使用，一开始不要过早的加入，特别注意是使用缓存要先考虑清楚是会有可能缓存了不可缓存的内容。缓存能提升系统性能，但也有可能导致数据错误了，请谨慎。最后，如果大家有什么疑问可以在[issue](https://github.com/vicanso/articles/issues/1)中提出。
+对于缓存的使用，一开始不要过早的加入，特别注意是使用缓存要先考虑清楚是会有可能缓存了不可缓存的内容。缓存能提升系统性能，但也有可能导致数据错误了，请谨慎。最后，如果大家有什么疑问可以在[issue](https://github.com/vicanso/articles/issues/1)中提出。如果需要网上生成varnish配置文件，可以使用[http://aslant.site/varnish-generator/]( http://aslant.site/varnish-generator/)在线生成。
