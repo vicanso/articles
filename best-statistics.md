@@ -216,4 +216,4 @@ select count(distinct(account)) from "mydb".."order" where time >= now() - 2h
 ### 附：
 
 - 上面例子中node.js中写入数据至influxdb使用的是[influxdb-nodejs](https://github.com/vicanso/influxdb-nodejs)
-- 上面例子中展示截图中展示数据用到的是[aslant](https://github.com/vicanso/aslant)
+- 上面例子中展示截图中展示数据用到的是[aslant](https://github.com/vicanso/aslant)，测试账号：aslant 密码：aslant
