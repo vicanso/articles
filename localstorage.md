@@ -44,12 +44,14 @@
 
 - 后端定义缓存的`namespace`以及各`namespace`缓存的的`max-length`
 - 在客户端增加缓存初始化脚本，在加载完页面之后，对不在列表中的`namespace`做清除
-- `lru-store`根据列表中返回的`namespane`以及`max-length`初始化，缓存的清除则是根据`lru`自动清除
+- `lru-store`根据列表中返回的`namespace`以及`max-length`初始化，缓存的清除则是根据`lru`自动清除
 
-通过如此方式调整之后，对整体的`localStorage`可控，基本只需要定义好`namespace`与其`max-length`就好，在使用过程中，一般配置的`namespance`不超过10个，每个的长度基本在20以下，也不需要经常的做增加、删除。`lru-store`则能保证每个缓存的数据量不会超过特定的阀值，而使用得多的缓存也能更好的利用。
+通过如此方式调整之后，对整体的`localStorage`可控，基本只需要定义好`namespace`与其`max-length`就好，在使用过程中，一般配置的`namespace`不超过10个，每个的长度基本在20以下，也不需要经常的做增加、删除。`lru-store`则能保证每个缓存的数据量不会超过特定的阀值，而使用得多的缓存也能更好的利用。
 
 
 
 ## 后续优化
 
 在后续阶段，收集缓存的命中、清除等事件，根据统计数据调节各缓存的`max-length`，以前那种滥用缓存的情况不复存在，使用缓存也不再需要考虑其它的因素了。
+
+注： `lru-store`每次更新都会将整个`namespace`的数据写到`localstorage`
