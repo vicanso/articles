@@ -1,0 +1,8 @@
+{
+  "name": "influxdb-performance",
+  "dependencies": {
+    "influxdb-nodejs": "^2.7.0",
+    "lodash": "^4.17.4",
+    "shortid": "^2.2.8"
+  }
+}
