@@ -2,8 +2,17 @@ const shortid = require('shortid');
 const _ = require('lodash');
 const Influx = require('influxdb-nodejs');
 const cluster = require('cluster');
+const processNames = [
+  'cherry',
+  'grape',
+  'watermenlon',
+  'coconut',
+  'lichee',
+  'pear',
+  'pomelo',
+  'avocado',
+];
 
-const numCPUs = require('os').cpus().length;
 const client = new Influx('http://localhost:8086/mydb');
 let maxQueueSize = 300;
 
@@ -34,6 +43,7 @@ function writePoint() {
     spdy,
     type,
     route: _.sample(routes),
+    process: process.env.NAME || 'unknown',
   };
   const fields = {
     code: _.random(100, 599),
@@ -57,8 +67,10 @@ function writePoint() {
 }
 
 if (cluster.isMaster) {
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
+  for (let i = 0; i < 8; i++) {
+    cluster.fork({
+      NAME: processNames[i],
+    });
   }
 } else {
   writePoint();
