@@ -4,3 +4,4 @@
 - [使用influxdb有感](https://github.com/vicanso/articles/blob/master/best-statistics.md)
 - [localStorage，您坑了吗？](https://github.com/vicanso/articles/blob/master/localstorage.md)
 - [统计-监控-预警一体化](https://github.com/vicanso/articles/blob/master/stats-monitor-warning.md)
+- [负载均衡-自定义dns](https://github.com/vicanso/articles/blob/master/custom-dns.md
