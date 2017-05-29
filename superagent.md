@@ -160,7 +160,7 @@ _.forEach(['get', 'post', 'put', 'del', 'patch'], (method) => {
 });
 ```
 
-上面的代码也使用了`superagent`的`plugin`的使用方式，在此推荐一下我自己写的[superagent-load-balancer](https://github.com/vicanso/superagent-load-balancer)，程序中实现对load balance的处理。下面是一次增加了性能与日志统计的调用代码与日志输出：
+上面的代码也使用了`superagent`的`plugin`的使用方式，在此推荐一下我自己写的[superagent-load-balancer](https://github.com/vicanso/superagent-load-balancer)，该模块实现对load balance的处理，可以不再依赖于`nginx`等反向代理软件。下面是一次增加了性能与日志统计的调用代码与日志输出：
 
 ```
 // 函数调用：
