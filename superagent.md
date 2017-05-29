@@ -177,6 +177,30 @@ request.post('https://github.com/login/oauth/access_token')
 host="github.com" path="/login/oauth/access_token" method="POST" data="client_id="04e3e64ca25edf31751e" client_secret="9db4f834ac567ed6916a0bee9a4906b39299f9f4" code="a0e7478bbedefc9000be"" code=200 use=2172
 ```
 
+## 扩展`Requset`函数
+
+我们可以对`Request`扩展，增加更多更方便的功能，如添加接口版本以及设置`no-cache`：
+
+```js
+request.Request.prototype.version = function version(v) {
+  this.set('Accept', `application/vnd.myAPP.v${v}+json`);
+  return this;
+};
+request.Request.prototype.noCache = function noCache() {
+  const method = this.method;
+  // if get and head set Cache-Control:no-cache header
+  // the If-None-Match field will not be added
+  if (method === 'GET' || method === 'HEAD') {
+    this.query({
+      'cache-control': 'no-cache',
+    });
+  } else {
+    this.set('Cache-Control', 'no-cache');
+  }
+  return this;
+};
+``
+
 ## 结语
 
 在此并不是说`superagent`就是比`request`更好，只能说我更喜欢`superagent`的实现机制，更主要的是『我是`TJ`的脑残粉』。
