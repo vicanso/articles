@@ -45,7 +45,7 @@ description            = token | quoted-string
 
 如何生成`Server-Timing`，请大家支持我写的node.js模块[supertiming](https://github.com/vicanso/supertiming)。
 
-## Tming View
+## Timing View
 
 由于现在主要的还是移动网站比较多，在手机上测试没有PC那么方便直观的展示`Network`中的`Server-Timing`，而且为了方便产品测试的时候能出问题能方便查看，所以需要更便捷的展示接口时间线。
 
