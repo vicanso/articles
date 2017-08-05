@@ -14,7 +14,7 @@ HTTP的统计主要分两种，一种是作为客户端去调用其它服务获�
   - 后端程序处理生成响应数据
   - 接收响应数据
 
--  Response
+-  Response(在使用koa做测试时，发现response之后未立即响应close)
   - 创建`Socket`
   - 后端程序处理生成响应数据并返回
 
@@ -34,15 +34,15 @@ HTTP的统计主要分两种，一种是作为客户端去调用其它服务获�
 - status code
 - bytes
 - timing 
-    - socket 创建socket的时长
-    - dns 域名解析的时长
-    - tcp 创建TCP连接握手时长
-    - tls 如果是HTTPS，需要做TLS握手，其时长
-    - processing 程序接收请求，处理时长
-    - transfer 数据传输时长
-    - all 整个HTTP处理时长
+  - socket 创建socket的时长
+  - dns 域名解析的时长
+  - tcp 创建TCP连接握手时长
+  - tls 如果是HTTPS，需要做TLS握手，其时长
+  - processing 程序接收请求，处理时长
+  - transfer 数据传输时长
+  - all 整个HTTP处理时长
 
-最开始的想法是对`http`模块做改造，在研究`http`模块的时候，发现可以通过对`OutgoingMessage`做调整获取得到HTTP处理过程中的`socket`，而通过监控`socket`中的相关事件，下面是简约的代码介绍：
+最开始的想法是对`http`模块做改造，在研究`http`模块的时候，发现可以通过对`OutgoingMessage`做调整获取得到HTTP处理过程中的`socket`，而通过监控`socket`中的相关事件，下面是简要的代码介绍：
 
 ```js
 // http-performance
@@ -124,4 +124,4 @@ httpPerf.on('stats', (stats) => {
 
 对于系统的优化，监控，我们都基于统计数据，而如何高效又无入侵式代码的统计则是我们的优先选择，如果你的系统也苦恼于性能的优化与系统的监控，可以参考本文对系统做调整，在获取到统计数据之后就可有的放矢。
 
-\* 在此我又要推荐一次`influxdb`，真的很好用
+\* 在此我又要推荐一次`influxdb`，真的很好用！
