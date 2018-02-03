@@ -179,4 +179,4 @@ Transfer/sec:      2.33MB
 
 自己去实现一个简化的`varnish`，这个几年前已经有的想法。在终于开始决心学习`golang`之后，才开始了`pike`这个项目的实现，在此只是为了实现自己几年以来的想法，并学习多一门新的语言。
 
-如果愿意试用`pike`，做小白鼠的，请在项目中联系我(https://github.com/vicanso/pike)，提供一步步式的搭建帮助。在此，感恩不言谢！
+如果愿意试用`pike`，做小白鼠的，请在项目中联系我[https://github.com/vicanso/pike](https://github.com/vicanso/pike)，提供一步步式的搭建帮助。在此，感恩不言谢！
