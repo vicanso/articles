@@ -1,0 +1,10 @@
+{
+  "name": "identifying-code",
+  "scripts": {
+    "start": "node app"
+  },
+  "dependencies": {
+    "keygrip": "^1.0.2",
+    "lodash": "^4.17.10"
+  }
+}
