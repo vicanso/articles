@@ -1,0 +1,5 @@
+# default
+app: viper-test
+db:
+  uri: postgres://tree:mypwd@127.0.0.1:5432/viper-test?connect_timeout=5&sslmode=disable
+  poolSize: 100
