@@ -13,6 +13,6 @@
 - [统计-监控-预警一体化](https://github.com/vicanso/articles/blob/master/stats-monitor-warning.md)
 - [localStorage，您坑了吗？](https://github.com/vicanso/articles/blob/master/localstorage.md)
 - [使用influxdb有感](https://github.com/vicanso/articles/blob/master/best-statistics.md)
-- [如何打造更安全的密码](https://github.com/vicanso/articles/edit/master/safer-password.md)
+- [如何打造更安全的密码](https://github.com/vicanso/articles/blob/master/safer-password.md)
 - [Express中Session的优化](https://github.com/vicanso/articles/blob/master/express-session.md)
 - [善用HTTP缓存利器-Varnish](https://github.com/vicanso/articles/blob/master/varnish-suggestion.md)
