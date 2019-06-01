@@ -1,4 +1,6 @@
-# 前言
+# axios妙用技巧
+
+## 前言
 
 应用开发中，各服务的调用使用最多的就是HTTP的形式，使用的HTTP client也从request --> superagent --> axios。`axios`中的各类函数都是基于`promise`的形式，虽然我也钟情于`superagent`的链式调用，但`axios`的各类`promise`：`transform`，`interceptor`等特性，只能拥抱无法拒绝~
 
