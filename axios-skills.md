@@ -46,7 +46,11 @@ const localService = axios.create({
     // 复用原有的转换，实现json --> json string
     axios.defaults.transformRequest[0],
     (data, header) => {
-      // 如果数据少于1KB，不压缩
+      // 如果已处理过数据，则跳过
+      if (!header['Content-Encoding']) {
+        return data;
+      }
+      // 如果数据长度1KB（如字符数据并不一定小于1KB），不压缩
       if (data.length < 1024) {
         return data;
       }
@@ -165,7 +169,7 @@ main();
 
 ## http(s)Agent
 
-指定在nodejs环境中的http(s)的agent，如可以启用keepAlive，复用TCP连接，提升性能（默认是未启用）。
+指定在nodejs环境中的http(s)的agent，如maxSockets，timeout等。下面例子中启用keepAlive，复用TCP连接，提升性能（默认是未启用）。
 
 ```js
 const axios = require('axios');
@@ -264,7 +268,8 @@ class Backends {
     return backend;
   }
   doHealthCheck() {
-    // 可以调用为5次测试，3次通过则认为healthy
+    // 可以根据需要调整为更完善的检测方法，
+    // 如检测5次，3次通过则认为healthy
     this.backends.forEach((backend) => {
       axios.get(`${backend.url}/ping`).then((res) => {
         const {
@@ -507,3 +512,7 @@ app
 
 app.listen(3000);
 ```
+
+## 小结
+
+在认真了解`axios`之前，我一直不解为什么其star的数量这么高，比`superagent`高了那么多，当时自己没去研究，理所当然认为`因为vue推荐使用它`，所以才那么火，深入了解之后，发现它的确有着过人之处。不要让自己的见识误解世界，要以实践了解世界。
