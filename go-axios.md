@@ -212,6 +212,54 @@ func main() {
 }
 ```
 
+## 出错转换
+
+我们的REST服务出错是返回的HTTP状态码为4xx，5xx，而axios默认只为请求出错时才会返回Error，因此我们需要针对各服务将出错的响应直接转换为相应的Error，简化编码流程，也保证针对出错的正常处理（因为开发者有时会只判断Error，而未判断状态码），示例如下：
+
+```go
+package main
+
+import (
+	"errors"
+	"fmt"
+
+	"github.com/vicanso/go-axios"
+
+	jsoniter "github.com/json-iterator/go"
+)
+
+var (
+	standardJSON = jsoniter.ConfigCompatibleWithStandardLibrary
+)
+var (
+	aslant = axios.NewInstance(&axios.InstanceConfig{
+		BaseURL: "https://ip.aslant.site/",
+		ResponseInterceptors: []axios.ResponseInterceptor{
+			convertResponseToError,
+		},
+	})
+)
+
+// convertResponseToError convert http response(4xx, 5xx) to error
+func convertResponseToError(resp *axios.Response) (err error) {
+	if resp.Status >= 400 {
+		// 我们标准的响应出错消息记录至message中
+		message := standardJSON.Get(resp.Data, "message").ToString()
+		if message == "" {
+			message = "Unknown Error"
+		}
+		// 也可自定义出错类
+		err = errors.New(message)
+	}
+	return
+}
+
+func main() {
+	_, err := aslant.Get("/ip-locations/json/123")
+	fmt.Println(err)
+}
+```
+
 ## Mock测试
 
 系统依赖于各种服务，最需要处理的就是如何在测试中不受其它系统的影响，因为需要简单易用的mock方式，示例如下：
