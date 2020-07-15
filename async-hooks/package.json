@@ -7,7 +7,7 @@
     "async-local-storage": "^1.0.0",
     "bluebird": "^3.5.0",
     "koa": "^2.2.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.19",
     "mongoose": "^4.10.6",
     "shortid": "^2.2.8",
     "superagent": "^3.5.2",
