@@ -2,13 +2,14 @@
 
 ## 简介
 
-Pike是参考varnish实现的http缓存加速器，使用golang开发，纯go的实现可简单编译成各系统版本，现已提供windows, macos, linux以及docker的版本，可直接在[github:pike](https://github.com/vicanso/pike)中下载对应版本，或使用`vicanso/pike:vicanso/pike:v4.0.3`版本镜像。与varnish相比，其特性如下：
+Pike是参考varnish实现的http缓存加速器，使用golang开发，纯go的实现可简单编译成各系统版本，现已提供windows, macos, linux以及docker的版本，可直接在[github:pike](https://github.com/vicanso/pike)中下载对应版本，或使用`vicanso/pike:vicanso/pike:v4.0.4`版本镜像。与varnish相比，其特性如下：
 
 - 提供WEB形式的配置管理，无中断的实时更新配置，简便易用
 - 配置支持保存至文件或etcd，方便多实例部署
 - 同时支持gzip与br压缩处理，自动根据客户端支持的压缩方式响应
 - 基于`Cache-Control`缓存时长设置，由接口开发者定义接口是否可缓存及缓存时长
 - 可配置告警回调，实时监控upstream中相关节点异常
+- 支持自定义日志，可配置按日期与大小分割日志并压缩
 
 启用命令如下：
 
