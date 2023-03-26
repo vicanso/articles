@@ -36,4 +36,4 @@ docker镜像由一层层的layer构成，第一层为基础镜像，而后面的
 
 ## 小结
 
-diving提供快速便捷的镜像分析方式，可以定期针对项目镜像汇总生成分析报告，优化镜像构建逻辑，精简避免无效镜像数据。
+diving提供快速便捷的镜像分析方式，可以定期针对项目镜像汇总生成分析报告，优化镜像构建逻辑，精简避免无效镜像数据。diving提供了terminal与以web形式，web的测试地址可以直接使用以下地址：[https://diving.npmtrend.com/](https://diving.npmtrend.com/)
