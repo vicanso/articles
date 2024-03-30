@@ -1,7 +1,12 @@
 # 如何使用pingora构建自己反向代理
 
-Cloudflare开源了其基于rust构建的反向代理框架`pingora`，已经在Cloudflare的云服务中实际使用，每秒支撑起超过4000万个互联网请求(需要注意，此处并不是性能指标)。[pingap](https://github.com/vicanso/pingap)使用pingora提供的各种模块，基于toml的配置方式，提供更便捷的方式配置反向代理。
+Cloudflare开源了其基于rust构建的反向代理框架`pingora`，已经在Cloudflare的云服务中实际使用，每秒支撑起超过4000万个互联网请求(需要注意，此处并不是性能指标)。[pingap](https://github.com/vicanso/pingap)使用pingora提供的各种模块，基于toml的配置方式，提供更便捷的方式配置反向代理。主要特性如下：
 
+- 支持通过`host`与`path`选择对应的location
+- HTTP 1/2两种方式的支持
+- 无请求中断式的优雅更新
+- 模板式的请求日志配置
+- 基于TOML形式的程序配置
 
 ## 请求处理流程
 
