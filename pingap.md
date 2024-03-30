@@ -1,6 +1,7 @@
 # 如何使用pingora构建自己反向代理
 
-Cloudflare开源了其基于rust构建的反向代理框架`pingora`，已经在Cloudflare的云服务中实际使用，每秒支撑起超过4000万个互联网请求(需要注意，此处并不是性能指标)。以往使用golang开发了类似varnish的http缓存服务pike，本次则准备开发类似nginx的软件[pingap](https://github.com/vicanso/pingap)。
+Cloudflare开源了其基于rust构建的反向代理框架`pingora`，已经在Cloudflare的云服务中实际使用，每秒支撑起超过4000万个互联网请求(需要注意，此处并不是性能指标)。[pingap](https://github.com/vicanso/pingap)使用pingora提供的各种模块，基于toml的配置方式，提供更便捷的方式配置反向代理。
+
 
 ## 请求处理流程
 
@@ -21,12 +22,12 @@ graph TD;
     locationB -- "10.0.0.2:8002" --> upstreamB2
 ```
 
-`pingap`整体的设计比较简单，基于`host`与`path`选择匹配的`location`，根据需要判断是否重写path以及设置相应的请求头，之后将请求转发至对应的`upstream`，而`pingora`的完整处理流程可以查看官方说明的[phase_chart](https://github.com/cloudflare/pingora/blob/main/docs/user_guide/phase_chart.md)，下面我们从零开始构建`pingap`。
+`pingap`整体的流程简化为三步，接受到请求后基于`host`与`path`选择匹配的`location`，判断是否重写path以及设置相应的请求头，之后将请求转发至对应的`upstream`，而`pingora`的完整处理流程可以查看官方说明的[phase_chart](https://github.com/cloudflare/pingora/blob/main/docs/user_guide/phase_chart.md)，下面我们从零开始构建`pingap`。
 
 
 ## Upstream
 
-upstream的整体比较简单，配置了多个节点的地址，根据指定的算法获取对应的节点，完整的实现可查看代码[upstream.rs](https://github.com/vicanso/pingap/blob/main/src/proxy/upstream.rs)。主要介绍一下其`new_http_peer`的实现：
+upstream比较简单，支持配置多节点地址，根据指定的算法获取对应的节点，完整的实现可查看代码[upstream.rs](https://github.com/vicanso/pingap/blob/main/src/proxy/upstream.rs)。主要介绍一下其`new_http_peer`的实现：
 
 ```rust
 pub fn new_http_peer(&self, _ctx: &State, header: &RequestHeader) -> Option<HttpPeer> {
@@ -53,10 +54,10 @@ pub fn new_http_peer(&self, _ctx: &State, header: &RequestHeader) -> Option<Http
 }
 ```
 
-从代码可以看出，按指定的`load balancer`的算法，选择符合的`upstream`，之后创建对应的`HttpPeer`用于后续与upstream的连接。需要注意以下处理逻辑：
+从代码可以看出，按指定的`load balancer`的算法，选择符合的`upstream`，之后创建对应的`HttpPeer`用于后续节点的连接。需要注意以下处理逻辑：
 
 - `pingap`中对于`upstream`有对应的health check，支持`http`与`tcp`的形式，若未指定则默认以`tcp`的形式检测端口是否可连接，因此若所有节点均检测不通过时，则返回`None`。
-- `pingora`与`upstream`的连接是可复用的，若不想复用则设置`idle_timeout`为0，默认`None`表示无过期清除时长。而`upstream_keepalive_pool_size`默认为128的连接池，但是`pingora`暂未提供直接设置该值的方式，只能通过`yaml`配置加载，一般也不需要调整。
+- 与`upstream`的连接是可复用的，若不想复用则设置`idle_timeout`为0，默认`None`表示无过期清除时长。而`upstream_keepalive_pool_size`默认为128的连接池，但是`pingora`暂未提供直接设置该值的方式，只能通过`yaml`配置加载，一般也不需要调整。
 
 ## Location
 
@@ -93,7 +94,7 @@ fn new_path_selector(path: &str) -> Result<PathSelector> {
 
 - `空路径`: 未指定其匹配的路径，所有请求路径均符合
 - `正则匹配`: 以~开头的配置，表示通过正则匹配判断是否符合
-- `全等匹配`: 以=开着的配置，表示请求路径完全相等
+- `全等匹配`: 以=开头的配置，表示请求路径完全相等
 - `前缀匹配`: 默认为前缀匹配，前缀匹配的性能比正则要好，建议使用
 
 需要注意，因为不同的location可以关联到同一个server，因此需要注意各匹配规则是否有冲突，同一server下的所有location按以下方式计算权重排序：
@@ -129,7 +130,7 @@ location的path支持正则的方式改写，如配置`rewrite: Some("^/users/(.
 
 ## Server
 
-Server关联了其对应的所有location，在接收到`downstream`的请求后，根据权重一一匹配其所有location，匹配符合的则请求对应的`upstream`将响应数据，下面先来介绍一下Server的定义：
+Server关联了其对应的所有location，在接收到`downstream`的请求后，根据权重一一匹配其所有location，匹配符合的则请求对应的`upstream`获取响应数据，下面先来介绍一下Server的定义：
 
 ```rust
 pub struct Server {
@@ -199,7 +200,7 @@ Server在执行时，根据所有的location生成对应的后台服务(health c
 
 `pingora`默认实现了`ProxyHttp`大部分实现，完整的处理流程参考[phase_chart](https://github.com/cloudflare/pingora/blob/main/docs/user_guide/phase_chart.md)，因此Server仅针对需求实现相应的逻辑，下面是简化的说明：
 
-- `request_filter`: 根据host与path选择对应的location
+- `request_filter`: 根据host与path选择对应的location(后续支持配置location的请求可缓存)
 - `upstream_peer`: 根据location中是否配置path重写与请求头添加，处理相应的逻辑
 - `connected_to_upstream`: 记录与upstream的一些连接信息，如连接是否复用，服务地址等
 - `upstream_response_filter`: 在请求响应至downupstream时触发，根据是否配置了需要添加响应头，处理相应的逻辑
@@ -327,4 +328,4 @@ impl ProxyHttp for Server {
 
 ## 其它
 
-`pingap`还有配置读取、日志格式化以及web的管理后台配置部分，这几部分较为简单可以直接查看源代码的实现。
+`pingap`还有配置读取、访问日志格式化以及web的管理后台配置部分，这几部分较为简单可以直接查看源代码的实现。
